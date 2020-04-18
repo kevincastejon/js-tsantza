@@ -31,6 +31,6 @@
       "react/prop-types":"off"
     },
     "settings": {
-      "import/core-modules": ["electron", "react", "react-dom"]
+      "import/core-modules": ["electron", "react", "react-dom", "webpack", "html-webpack-plugin", "babili-webpack-plugin", "extract-text-webpack-plugin"]
     }
 }

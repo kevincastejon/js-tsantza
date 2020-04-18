@@ -82,7 +82,7 @@ function createWindow() {
     mainWindow.show();
     // Open the DevTools automatically if developing
     if (dev) {
-      // mainWindow.webContents.openDevTools();
+      mainWindow.webContents.openDevTools();
     }
   });
 
@@ -95,40 +95,48 @@ function createWindow() {
   });
   ipcMain.on('onAddImages', async (e, files) => {
     const images = [];
-    for (let i = 0; i < files.length; i += 1) {
-      const file = files[i];
-      const base64 = (await fetch.local(file))[1];
-      images.push({ path: file, base64 });
+    try {
+      for (let i = 0; i < files.length; i += 1) {
+        const file = files[i];
+        const base64 = (await fetch.local(file))[1];
+        images.push({ path: file, base64 });
+      }
+      e.sender.send('onImagesAdded', images);
+    } catch (err) {
+      e.sender.send('onError', err.message);
     }
-    e.sender.send('onImagesAdded', images);
   });
   ipcMain.on('onResize', async (e, images, maxWidth, maxHeight, outputType, outputPath, conversion) => {
-    for (let i = 0; i < images.length; i += 1) {
-      const img = await sharp(Buffer.from(images[i].base64.split(',')[1], 'base64'), { failOnError: false });
-      const meta = await img.metadata();
-      if (maxWidth !== null) {
-        const landscape = meta.width >= meta.height;
-        const size = landscape ? { height: maxHeight } : { width: maxWidth };
-        await img.resize(size);
+    try {
+      for (let i = 0; i < images.length; i += 1) {
+        const img = await sharp(Buffer.from(images[i].base64.split(',')[1], 'base64'), { failOnError: false });
+        const meta = await img.metadata();
+        if (maxWidth !== null) {
+          const landscape = meta.width >= meta.height;
+          const size = landscape ? { height: maxHeight } : { width: maxWidth };
+          await img.resize(size);
+        }
+        if (conversion === 'jpeg') {
+          await img.jpeg();
+        } else if (conversion === 'png') {
+          await img.png();
+        } else if (conversion === 'webp') {
+          await img.webp();
+        }
+        if (outputType === 'folder') {
+          await img.toFile(path.resolve(outputPath, conversion === 'none' ? path.basename(images[i].path) : `${path.basename(images[i].path, path.extname(images[i].path))}.${conversion}`));
+        } else if (outputType === 'original') {
+          await unlink(images[i].path);
+          await img.toFile(path.resolve(
+            path.dirname(images[i].path),
+            conversion === 'none' ? path.basename(images[i].path) : `${path.basename(images[i].path, path.extname(images[i].path))}.${conversion}`,
+          ));
+        }
       }
-      if (conversion === 'jpeg') {
-        await img.jpeg();
-      } else if (conversion === 'png') {
-        await img.png();
-      } else if (conversion === 'webp') {
-        await img.webp();
-      }
-      if (outputType === 'folder') {
-        await img.toFile(path.resolve(outputPath, conversion === 'none' ? path.basename(images[i].path) : `${path.basename(images[i].path, path.extname(images[i].path))}.${conversion}`));
-      } else if (outputType === 'original') {
-        await unlink(images[i].path);
-        await img.toFile(path.resolve(
-          path.dirname(images[i].path),
-          conversion === 'none' ? path.basename(images[i].path) : `${path.basename(images[i].path, path.extname(images[i].path))}.${conversion}`,
-        ));
-      }
+      e.sender.send('onResized');
+    } catch (err) {
+      e.sender.send('onError', err.message);
     }
-    e.sender.send('onResized');
   });
 }
 

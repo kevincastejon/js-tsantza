@@ -37,6 +37,7 @@ class App extends Component {
     this.state = {
       images: [],
       loading: false,
+      dragging: false,
       outputType: 'original',
       outputPath: null,
       maxWidth: 1920,
@@ -55,6 +56,9 @@ class App extends Component {
     ipcRenderer.on('onImagesAdded', (e, addedImages) => this.onImagesAdded(addedImages));
     ipcRenderer.on('onResized', () => this.setState({
       notif: true, notifType: 'success', notifMessage: 'Images traitées!', loading: false, images: [],
+    }));
+    ipcRenderer.on('onError', (e, err) => this.setState({
+      notif: true, notifType: 'error', notifMessage: err, loading: false, images: [],
     }));
     ipcRenderer.on('open', () => {
       this.addFilesButton.click();
@@ -85,7 +89,7 @@ class App extends Component {
 
   render() {
     const {
-      images, loading, outputType, maxWidth, maxHeight, sizePreset, outputPath, conversion, notif, notifType, notifMessage,
+      images, loading, dragging, outputType, maxWidth, maxHeight, sizePreset, outputPath, conversion, notif, notifType, notifMessage,
     } = this.state;
     const { theme } = this.props;
     return (
@@ -95,10 +99,20 @@ class App extends Component {
           e.stopPropagation();
           e.preventDefault();
         }}
-        onDrop={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          this.addImages(event.dataTransfer.files);
+        onDragEnter={(e) => {
+          if (e.target === e.currentTarget) {
+            this.setState({ dragging: true });
+          }
+        }}
+        onDragLeave={(e) => {
+          if (e.target === e.currentTarget) {
+            this.setState({ dragging: false });
+          }
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.addImages(e.dataTransfer.files);
         }}
       >
         {!notif ? null : (
@@ -168,7 +182,7 @@ class App extends Component {
           overflow: 'hidden',
           backgroundColor: theme.palette.background.paper,
           minHeight: 190,
-          borderStyle: 'solid',
+          borderStyle: dragging ? 'dashed' : 'solid',
         }}
         >
           <GridList

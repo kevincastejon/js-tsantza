@@ -26,15 +26,22 @@ import {
 } from '@material-ui/icons';
 import MuiAlert from '@material-ui/lab/Alert';
 import logo from '../assets/img/logo.png';
+import localize from '../assets/data/lang';
+import getLocale from '../utils/Locale';
 
 const { dialog } = remote;
 function Alert(props) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
+function µ(key) {
+  const { lang } = this.state;
+  return (localize(lang, key));
+}
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      lang: getLocale(),
       images: [],
       loading: false,
       dragging: false,
@@ -50,10 +57,12 @@ class App extends Component {
     };
     this.addFilesButton = React.createRef();
     this.selectDirButton = React.createRef();
+    µ = µ.bind(this);
   }
 
   componentDidMount() {
     ipcRenderer.on('onImagesAdded', (e, addedImages) => this.onImagesAdded(addedImages));
+    ipcRenderer.on('onLangChanged', (e, lang) => this.setState({ lang }));
     ipcRenderer.on('onResized', () => this.setState({
       notif: true, notifType: 'success', notifMessage: 'Images traitées!', loading: false, images: [],
     }));
@@ -85,7 +94,6 @@ class App extends Component {
       ipcRenderer.send('onAddImages', ar);
     }
   }
-
 
   render() {
     const {
@@ -156,9 +164,9 @@ class App extends Component {
         >
           <p>
             <Button style={{ color: 'green' }} onClick={() => this.addFilesButton.click()} startIcon={<AddAPhoto />}>
-              Ajouter des images
+              {µ('addImages')}
             </Button>
-            ou glissez-déposez les dans la fenetre
+            {µ('orDragAndDrop')}
             <input
               ref={(el) => { this.addFilesButton = el; }}
               style={{
@@ -222,7 +230,7 @@ class App extends Component {
           <Grid container spacing={4} alignItems="center" justify="center">
             <Grid item>
               <FormControl component="fieldset">
-                <FormLabel component="legend">Type de sortie</FormLabel>
+                <FormLabel component="legend">{µ('outputType')}</FormLabel>
                 <RadioGroup
                   aria-label="radioGroup"
                   name="radioGroup1"
@@ -236,8 +244,8 @@ class App extends Component {
                     });
                   }}
                 >
-                  <FormControlLabel value="original" control={<Radio color="primary" />} label="Remplacer les fichiers originaux" />
-                  <FormControlLabel value="folder" control={<Radio color="primary" />} label="Selectionner un dossier" />
+                  <FormControlLabel value="original" control={<Radio color="primary" />} label={µ('replaceOriginal')} />
+                  <FormControlLabel value="folder" control={<Radio color="primary" />} label={µ('selectDir')} />
                   {outputType !== 'folder' ? null : (
                     <div style={{ textAlign: 'left' }}>
                       <IconButton
@@ -266,7 +274,7 @@ class App extends Component {
             </Grid>
             <Grid item>
               <FormControl component="fieldset">
-                <FormLabel component="legend">Conversion</FormLabel>
+                <FormLabel component="legend">{µ('conversion')}</FormLabel>
                 <RadioGroup
                   aria-label="conversion"
                   name="conversion"
@@ -275,7 +283,7 @@ class App extends Component {
                     this.setState({ conversion: e.target.value });
                   }}
                 >
-                  <FormControlLabel value="none" control={<Radio color="primary" />} label="None" />
+                  <FormControlLabel value="none" control={<Radio color="primary" />} label={µ('none_f')} />
                   <FormControlLabel value="jpeg" control={<Radio color="primary" />} label="JPG" />
                   <FormControlLabel value="png" control={<Radio color="primary" />} label="PNG" />
                   <FormControlLabel value="webp" control={<Radio color="primary" />} label="WEBP" />
@@ -284,7 +292,7 @@ class App extends Component {
             </Grid>
             <Grid item>
               <FormControl component="fieldset">
-                <FormLabel component="legend">Redimensionnement</FormLabel>
+                <FormLabel component="legend">{µ('resizing')}</FormLabel>
                 <RadioGroup
                   aria-label="radioGroup"
                   name="radioGroup1"
@@ -292,6 +300,10 @@ class App extends Component {
                   onChange={(e) => {
                     let w = maxWidth;
                     let h = maxHeight;
+                    if (e.target.value === 'none') {
+                      w = null;
+                      h = null;
+                    }
                     if (e.target.value === 'fullhd') {
                       w = 1920;
                       h = 1080;
@@ -302,9 +314,10 @@ class App extends Component {
                     this.setState({ sizePreset: e.target.value, maxWidth: w, maxHeight: h });
                   }}
                 >
+                  <FormControlLabel value="none" control={<Radio color="primary" />} label={µ('none_m')} />
                   <FormControlLabel value="fullhd" control={<Radio color="primary" />} label="FULL HD (1080p)" />
                   <FormControlLabel value="hdready" control={<Radio color="primary" />} label="HD READY (720p)" />
-                  <FormControlLabel value="custom" control={<Radio color="primary" />} label="Personnalisé" />
+                  <FormControlLabel value="custom" control={<Radio color="primary" />} label={µ('custom')} />
                 </RadioGroup>
               </FormControl>
             </Grid>
@@ -314,7 +327,7 @@ class App extends Component {
                   disabled={sizePreset !== 'custom'}
                   style={{ width: 100 }}
                   id="maxWidthInput"
-                  label="Max-largeur"
+                  label={µ('maxWidth')}
                   type="number"
                   value={maxWidth}
                   InputLabelProps={{
@@ -327,7 +340,7 @@ class App extends Component {
                   disabled={sizePreset !== 'custom'}
                   style={{ width: 100 }}
                   id="maxHeightInput"
-                  label="Max-hauteur"
+                  label={µ('maxHeight')}
                   type="number"
                   value={maxHeight}
                   InputLabelProps={{
@@ -351,7 +364,8 @@ class App extends Component {
               ipcRenderer.send('onResize', images, maxWidth, maxHeight, outputType, outputType === 'folder' ? outputPath : null, conversion);
             }}
           >
-            Traiter!
+            {µ('treat')}
+            !
           </Button>
         </div>
       </div>

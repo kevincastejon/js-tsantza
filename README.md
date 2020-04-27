@@ -1,6 +1,6 @@
 # tsantza
 
-Free, open-source and fast image resizing and conversion application
+Free, open-source and fast image resizing and conversion desktop application
 
 ## Dev
 ```

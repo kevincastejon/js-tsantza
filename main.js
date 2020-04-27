@@ -1,4 +1,5 @@
 // Import parts of electron to use
+const { shell } = require('electron');
 const {
   ipcMain, app, BrowserWindow, Menu,
 } = require('electron');
@@ -38,6 +39,15 @@ const template = [
       {
         label: 'English',
         click: () => mainWindow.webContents.send('onLangChanged', 'en'),
+      },
+    ],
+  },
+  {
+    label: 'Help',
+    submenu: [
+      {
+        label: 'About',
+        click: () => shell.openExternal('https://tsantza.kevincastejon.fr'),
       },
     ],
   },
@@ -157,6 +167,7 @@ function createWindow() {
       e.sender.send('onError', errMsg);
     }
   });
+  require('update-electron-app')();
 }
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

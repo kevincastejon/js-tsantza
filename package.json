@@ -1,7 +1,7 @@
 {
   "name": "tsantza",
-  "version": "1.0.6",
-  "description": "Quick image resizing desktop application",
+  "version": "1.0.7",
+  "description": "Free, open-source and fast image resizing and conversion desktop application",
   "author": "kevincastejon",
   "homepage": "https://github.com/kevincastejon/tsantza",
   "repository": {
@@ -58,6 +58,7 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.49",
     "fetch-base64": "^2.1.2",
-    "sharp": "^0.25.2"
+    "sharp": "^0.25.2",
+    "update-electron-app": "^1.5.0"
   }
 }

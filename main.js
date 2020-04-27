@@ -125,11 +125,9 @@ function createWindow() {
     try {
       for (let i = 0; i < images.length; i += 1) {
         const img = await sharp(Buffer.from(images[i].base64.split(',')[1], 'base64'), { failOnError: false });
-        const meta = await img.metadata();
-        if (maxWidth !== null) {
-          const landscape = meta.width >= meta.height;
-          const size = landscape ? { height: maxHeight } : { width: maxWidth };
-          await img.resize(size);
+        const resizeOpt = { height: maxHeight, width: maxWidth, fit: 'inside' };
+        if (maxWidth) {
+          await img.resize(resizeOpt);
         }
         if (conversion === 'jpeg') {
           await img.jpeg();

@@ -301,8 +301,8 @@ class App extends Component {
                     let w = maxWidth;
                     let h = maxHeight;
                     if (e.target.value === 'none') {
-                      w = null;
-                      h = null;
+                      w = 0;
+                      h = 0;
                     }
                     if (e.target.value === 'fullhd') {
                       w = 1920;

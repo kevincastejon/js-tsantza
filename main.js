@@ -115,6 +115,7 @@ function createWindow() {
         const file = files[i];
         const base64 = (await fetch.local(file))[1];
         images.push({ path: file, base64 });
+        e.sender.send('onAddProgress', (i / files.length) * 100);
       }
       e.sender.send('onImagesAdded', images);
     } catch (err) {
@@ -145,6 +146,7 @@ function createWindow() {
             conversion === 'none' ? path.basename(images[i].path) : `${path.basename(images[i].path, path.extname(images[i].path))}.${conversion}`,
           ));
         }
+        e.sender.send('onResizeProgress', (i / images.length) * 100);
       }
       e.sender.send('onResized');
     } catch (err) {

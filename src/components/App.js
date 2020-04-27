@@ -54,6 +54,7 @@ class App extends Component {
       notif: false,
       notifMessage: null,
       notifType: null,
+      progress: 0,
     };
     this.addFilesButton = React.createRef();
     this.selectDirButton = React.createRef();
@@ -63,11 +64,13 @@ class App extends Component {
   componentDidMount() {
     ipcRenderer.on('onImagesAdded', (e, addedImages) => this.onImagesAdded(addedImages));
     ipcRenderer.on('onLangChanged', (e, lang) => this.setState({ lang }));
+    ipcRenderer.on('onAddProgress', (e, progress) => this.setState({ progress }));
+    ipcRenderer.on('onResizeProgress', (e, progress) => this.setState({ progress }));
     ipcRenderer.on('onResized', () => this.setState({
-      notif: true, notifType: 'success', notifMessage: 'Images traitées!', loading: false, images: [],
+      progress: 0, notif: true, notifType: 'success', notifMessage: 'Images traitées!', loading: false, images: [],
     }));
     ipcRenderer.on('onError', (e, err) => this.setState({
-      notif: true, notifType: 'error', notifMessage: err, loading: false, images: [],
+      notif: true, notifType: 'error', notifMessage: err, loading: false, images: [], progress: 0,
     }));
     ipcRenderer.on('open', () => {
       this.addFilesButton.click();
@@ -76,7 +79,7 @@ class App extends Component {
 
   onImagesAdded(addedImages) {
     const { images } = this.state;
-    this.setState({ images: images.concat(addedImages.filter((el) => images.findIndex((e) => e.path === el.path) === -1)), loading: false });
+    this.setState({ progress: 0, images: images.concat(addedImages.filter((el) => images.findIndex((e) => e.path === el.path) === -1)), loading: false });
   }
 
   addImages(images) {
@@ -97,7 +100,7 @@ class App extends Component {
 
   render() {
     const {
-      images, loading, dragging, outputType, maxWidth, maxHeight, sizePreset, outputPath, conversion, notif, notifType, notifMessage,
+      images, loading, dragging, outputType, maxWidth, maxHeight, sizePreset, outputPath, conversion, notif, notifType, notifMessage, progress,
     } = this.state;
     const { theme } = this.props;
     return (
@@ -153,6 +156,7 @@ class App extends Component {
           open={loading}
         >
           <CircularProgress color="inherit" />
+          <span style={{ marginLeft: 10 }}>{progress === 0 ? null : `${parseInt(progress, 10)}%`}</span>
         </Backdrop>
         <img
           src={logo}

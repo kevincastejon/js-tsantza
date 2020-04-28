@@ -1,7 +1,9 @@
 // Import parts of electron to use
+require('update-electron-app')();
+
 const { shell } = require('electron');
 const {
-  ipcMain, app, BrowserWindow, Menu,
+  ipcMain, app, BrowserWindow, Menu, autoUpdater, dialog,
 } = require('electron');
 const path = require('path');
 const url = require('url');
@@ -13,6 +15,32 @@ const fs = require('fs');
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+// Keep a reference for dev mode
+let dev = false;
+if (process.defaultApp || /[\\/]electron-prebuilt[\\/]/.test(process.execPath) || /[\\/]electron[\\/]/.test(process.execPath)) {
+  dev = true;
+}
+if (!dev) {
+  setInterval(() => {
+    autoUpdater.checkForUpdates();
+  }, 60000);
+  autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+    const dialogOpts = {
+      type: 'info',
+      buttons: ['Restart', 'Later'],
+      title: 'Application Update',
+      message: process.platform === 'win32' ? releaseNotes : releaseName,
+      detail: 'New version downloaded. Reboot the app to update.',
+    };
+    dialog.showMessageBox(dialogOpts).then((returnValue) => {
+      if (returnValue.response === 0) autoUpdater.quitAndInstall();
+    });
+  });
+  autoUpdater.on('error', (message) => {
+    console.error('There was a problem updating the application');
+    console.error(message);
+  });
+}
 const template = [
   {
     label: 'File',
@@ -55,11 +83,7 @@ const template = [
 const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
 
-// Keep a reference for dev mode
-let dev = false;
-if (process.defaultApp || /[\\/]electron-prebuilt[\\/]/.test(process.execPath) || /[\\/]electron[\\/]/.test(process.execPath)) {
-  dev = true;
-}
+
 async function unlink(filePath) {
   return new Promise((res, rej) => {
     fs.unlink(filePath, (err) => {
@@ -167,7 +191,6 @@ function createWindow() {
       e.sender.send('onError', errMsg);
     }
   });
-  require('update-electron-app')();
 }
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

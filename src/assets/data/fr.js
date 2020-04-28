@@ -12,4 +12,10 @@ module.exports = {
   maxWidth: 'Max-largeur',
   maxHeight: 'Max-hauteur',
   treat: 'Traiter',
+  file: 'Fichier',
+  open: 'Ouvrir',
+  quit: 'Quitter',
+  language: 'Langage',
+  help: 'Aide',
+  about: 'A propos',
 };

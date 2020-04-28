@@ -11,4 +11,10 @@ module.exports = {
   custom: 'Custom',
   maxWidth: 'Max-width',
   treat: 'Treat',
+  file: 'File',
+  open: 'Open',
+  quit: 'Quit',
+  language: 'Language',
+  help: 'Help',
+  about: 'About',
 };

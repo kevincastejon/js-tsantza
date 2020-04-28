@@ -10,6 +10,8 @@ const url = require('url');
 const sharp = require('sharp');
 const fetch = require('fetch-base64');
 const fs = require('fs');
+const getLocale = require('./src/utils/Locale');
+const localize = require('./src/assets/data/lang');
 // const getLocale = require('./src/utils/Locale');
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -41,46 +43,59 @@ if (!dev) {
     console.error(message);
   });
 }
-const template = [
+
+let currentLang = getLocale();
+function µ(key) {
+  return (localize(currentLang, key));
+}
+function onLangChanged(lang) {
+  mainWindow.webContents.send('onLangChanged', lang);
+  currentLang = lang;
+  const newMenu = Menu.buildFromTemplate(template());
+  Menu.setApplicationMenu(newMenu);
+}
+
+const template = () => ([
   {
-    label: 'File',
+    label: µ('file'),
     submenu: [
       {
-        label: 'Open',
+        label: µ('open'),
         click: () => mainWindow.webContents.send('open'),
       },
       {
         type: 'separator',
       },
       {
-        role: 'Quit',
+        role: µ('quit'),
       },
     ],
   },
   {
-    label: 'Langage',
+    label: µ('language'),
     submenu: [
       {
         label: 'Français',
-        click: () => mainWindow.webContents.send('onLangChanged', 'fr'),
+        click: () => onLangChanged('fr'),
       },
       {
         label: 'English',
-        click: () => mainWindow.webContents.send('onLangChanged', 'en'),
+        click: () => onLangChanged('en'),
       },
     ],
   },
   {
-    label: 'Help',
+    label: µ('help'),
     submenu: [
       {
-        label: 'About',
+        label: µ('about'),
         click: () => shell.openExternal('https://tsantza.kevincastejon.fr'),
       },
     ],
   },
-];
-const menu = Menu.buildFromTemplate(template);
+]);
+
+const menu = Menu.buildFromTemplate(template());
 Menu.setApplicationMenu(menu);
 
 

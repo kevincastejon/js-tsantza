@@ -10,7 +10,6 @@ const url = require('url');
 const sharp = require('sharp');
 const fetch = require('fetch-base64');
 const fs = require('fs');
-const getLocale = require('./src/utils/Locale');
 const localize = require('./src/assets/data/lang');
 // const getLocale = require('./src/utils/Locale');
 
@@ -44,7 +43,7 @@ if (!dev) {
   });
 }
 
-let currentLang = getLocale();
+let currentLang = Intl.DateTimeFormat().resolvedOptions().locale;
 function µ(key) {
   return (localize(currentLang, key));
 }

@@ -17,7 +17,9 @@
       "output/**/*",
       "node_modules/**/*",
       "package.json",
-      "main.js"
+      "main.js",
+      "src/assets/data/*",
+      "src/utils/Locale.js"
     ]
   },
   "scripts": {
